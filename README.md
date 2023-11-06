@@ -56,6 +56,30 @@ python3 BouchonnageBarcarolle-Playlist-Generator.py -dir <directory> -mount <mou
 
 Replace the bracketed sections with parameters relevant to your desired output.
 
+## Flags
+
+The tool provides a number of command line arguments or flags to customize the behavior of the script. Here are their descriptions:
+
+| Flag | Description |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -dir | Directory from which you want to scan media files on the server. **(required)** |
+| -mount | The root of the directory on the client corresponding to `-dir`. |
+| -autoplst | If you want to autogenerate a playlist name, set `-autoplst` to `yes`. Otherwise, set it to `no` (default setting is `no`). |
+| -shuffle | If you want to shuffle the playlist, set `-shuffle` to `yes`. Otherwise, set it to `no` (default setting is `no`). |
+| -output | Specify an output directory for the playlist file. **(required)** |
+| -overwrite | If you want to overwrite an existing file, provide this flag. |
+| -portrait | If you only want to include vertical videos, provide this flag. |
+| -horz | If you only want to include horizontal videos, provide this flag. |
+| -min_length | To specify a minimum length for a video in seconds. Videos shorter than this will be excluded. |
+| -max_length | To specify a maximum length for a video in seconds. Videos longer than this will be excluded. |
+| -filename | Specify a filename for the playlist file. |
+
+Example command with some flags:
+
+```bash
+python3 BouchonnageBarcarolle-Playlist-Generator.py -dir /path/to/your/media/files -mount /path/on/client -autoplst yes -shuffle yes -output /path/to/output/folder -overwrite -portrait -min_length 30 -max_length 600 -filename my_playlist
+```
+
 ## Contributing
 
 We welcome contributions of all kinds to *BouchonnageBarcarolle-Playlist-Generator*. Whether you're improving the existing code, adding new functionality, or even fixing a typo, we appreciate your help!
