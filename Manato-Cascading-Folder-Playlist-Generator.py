@@ -15,6 +15,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 import argparse
+import py7zr
 
 
 def is_valid_directory(parser, path):
@@ -38,6 +39,15 @@ def check_for_git():
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
         print(f"\nGit is not installed or encountered an error:{e}. Please install or fix Git to proceed.")
         sys.exit()
+        
+def compress_with_7z(output_directory, zip_path):
+    try:
+        print('Compressing....')
+        with py7zr.SevenZipFile(f'{zip_path}.7z', 'w') as z:
+            z.writeall(output_directory)
+        print(f'Compressed the directory at: {zip_path}.7z')
+    except Exception as e:
+        print(f"An error occurred while compressing the directory: {e}")
 
 
 def check_for_barcarolle_script():
@@ -146,7 +156,14 @@ def main():
     parser.add_argument("-shuffle",
                         help="Specify to shuffle playlist",
                         action='store_true')
+    parser.add_argument("--zip", 
+                    help="Specify to create a zip file of the output directory",
+                    action='store_true')
 
+    parser.add_argument("--zippath", 
+                    help="Specify the path of the zipped file",
+                    required=False, 
+                    default=os.path.join(os.getcwd(), "compressed_dir"))
     # Argument for number of threads
     parser.add_argument("-t", 
                         help="Specify the number of threads to be used, default to number of cores", 
@@ -175,6 +192,8 @@ def main():
     
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         executor.map(playlist_for_directories, executor_args)
+    if args.zip:
+        compress_with_7z(args.TargetDir, args.zippath)
 
 if __name__ == "__main__":
     main()
@@ -202,4 +221,5 @@ if __name__ == "__main__":
 - generate_output_folder function creates an output folder if it doesn't exist.
 - The main() function runs the overall playlist generation process.
 - Run for mac playlists: Barcarolle-Playlist-Generator.py -dir /mnt/MonterosaSync/Storage/Other/Batch/r1001/ -mount /Volumes/MonterosaSync/Storage/Other/Batch/r1001/ -autoplst yes -shuffle yes -overwrite -horz -output /mnt/MonterosaSync/pb_output
+------
 """
