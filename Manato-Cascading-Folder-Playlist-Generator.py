@@ -106,4 +106,41 @@ def main():
                         choices=["mac", "linux", "both"], 
                         default="linux")
     parser.add_argument("-portrait", 
-                        help="Specify ▏
+                        help="Specify the portrait filter", 
+                        action='store_true')
+    parser.add_argument("-horizontal", 
+                        help="Specify the horizontal filter", 
+                        action='store_true')
+    parser.add_argument("-min_length", 
+                        help="Specify the minimum length filter", 
+                        type=float)
+    parser.add_argument("-max_length", 
+                        help="Specify the maximum length filter", 
+                        type=float)
+    
+    # Parse arguments
+    args = parser.parse_args()
+
+    # Checks for git and Barcarolle-Playlist-Generator.py
+    check_for_git()
+    check_for_barcarolle_script()
+    
+    # Operative Systems
+    OSs = ["mac", "linux"] if args.os == "both" else [args.os]
+    for dirpath, dirs, files in os.walk(args.MediaDir):
+        for OS in OSs:
+            structure = os.path.join(args.TargetDir, OS, os.path.relpath(dirpath, args.MediaDir))
+
+            # If the structure doesn't exist, create it
+            if not os.path.isdir(structure):
+                os.makedirs(structure)
+
+            print(f"Creating {OS} folder: {structure}")
+            call_playlist_generator(dirpath, structure, 
+                                    portrait=args.portrait, 
+                                    horizontal=args.horizontal,
+                                    min_length=args.min_length, 
+                                    max_length=args.max_length)
+
+if __name__ == "__main__":
+    main()
