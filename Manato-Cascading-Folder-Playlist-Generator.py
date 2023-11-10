@@ -191,6 +191,5 @@ if __name__ == '__main__':
 - generate_filters_flag function defines video selection flags based on user preferences.
 - generate_output_folder function creates an output folder if it doesn't exist.
 - The main() function runs the overall playlist generation process.
-- Run for mac playlists: Barcarolle-Playlist-Generator.py -dir /mnt/MonterosaSync/Storage/Other/Batch/r1001/ -mount /Volumes/MonterosaSync/Storage/Other/Batch/r1001/ -autoplst yes -shuffle yes -overwrite -horz -output /mnt/MonterosaSync/pb_output
 ------
 """
