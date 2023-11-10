@@ -45,8 +45,6 @@ Additional Script Notes:
 - `main()`: Orchestrates the overall playlist generation process.
 ------
 """
-# [The rest of your code including imports and function definitions would go here]
-
 # Standard library imports
 import os
 import argparse
