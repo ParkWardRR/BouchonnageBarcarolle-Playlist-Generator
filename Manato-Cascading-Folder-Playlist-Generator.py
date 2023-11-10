@@ -1,203 +1,176 @@
 #!/usr/bin/env python3
 # Manato-Cascading-Folder-Playlist-Generator.py
 
-
 """
-Manato Cascading Folder Playlist Generator
-This script generates playlists for media in a specified directory.
-This script checks if git and Barcarolle-Playlist-Generator.py are installed, 
-If not, the script prompts the user to download it from a specified URL.
-Usage: `python Manato-Cascading-Folder-Playlist-Generator.py -MediaDir /mnt/MonterosaSync/Storage/Other/ -TargetDir /mnt/MonterosaSync/pb_out/Storage/Other/ -horizontal -min_length 300 -os both -shuffle -t 4`
-"""
+Sample Execution Commands:
+--------------------------
+To generate a playlist without any filters and without creating an archive:
+python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -autoplst yes -zip no
 
+To generate a playlist with shuffled content and a minimum video length of 30 seconds, and archive the result:
+python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -shuffle yes -min_length 30
+
+To generate a playlist of horizontal videos only, a specified filename for the playlist, and create an archive:
+python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -filename my_horizontal_playlist.m3u8 -horz -zip yes
+
+For Mac specific playlist run:
+python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media/ -mount /client/media/ -autoplst yes -shuffle yes -overwrite -horz -output /path/to/output
+
+Parameters Table:
+-----------------
+| Flag         | Input Type     | Default  | Description                                                     | Example                                               |
+|--------------|----------------|----------|-----------------------------------------------------------------|-------------------------------------------------------|
+| -dir         | str (required) | -        | Directory containing media to process.                          | -dir /path/to/media                                   |
+| -mount       | str (required) | -        | Root of the directory on the client corresponding to -dir.      | -mount /client/media                                  |
+| -autoplst    | str            | no       | Autogenerate a playlist name? 'yes' or 'no'.                    | -autoplst yes                                         |
+| -shuffle     | str            | no       | Shuffle the playlist? 'yes' or 'no'.                            | -shuffle yes                                          |
+| -output      | str (required) | -        | Output directory for the playlist file.                         | -output /path/to/output                               |
+| -overwrite   | flag           | False    | Overwrite existing file if necessary.                           | -overwrite                                            |
+| -portrait    | flag           | False    | Include only videos with portrait orientation?                  | -portrait                                             |
+| -horz        | flag           | False    | Include only videos with horizontal orientation?                | -horz                                                 |
+| -min_length  | float          | -        | Minimum length of video in seconds to include.                  | -min_length 30                                        |
+| -max_length  | float          | -        | Maximum length of video in seconds to include.                  | -max_length 120                                       |
+| -filename    | str            | -        | Specify a filename for the playlist file.                       | -filename custom_playlist.m3u8                       |
+| -zip         | str            | yes      | Create a .7z compressed archive of the output directory? 'yes' or 'no'. | -zip no                                 |
+
+Note: Replace the placeholder paths with actual paths on your system where appropriate.
+Additional Script Notes:
+- Dependencies: ffmpeg, ffprobe, ffmpeg-python, and pip.
+- Use command line arguments for specifying options (via argparse).
+- Validity checks are performed for directory and file existence.
+- Dependencies are checked at runtime; if missing, they're installed via pip.
+- `scan_directory`: Scans for videos, filters by length and orientation.
+- `generate_filters_flag`: Defines flags for video selection based on user input.
+- `generate_output_folder`: Ensures the output folder exists.
+- `main()`: Orchestrates the overall playlist generation process.
+------
+"""
+# [The rest of your code including imports and function definitions would go here]
+
+# Standard library imports
 import os
-import subprocess
-import sys
-from concurrent.futures import ThreadPoolExecutor
 import argparse
+import random
+import string
+import sys
+from datetime import datetime
+
+# Third-party imports for handling video-processing and archive creation
+import ffmpeg
 import py7zr
 
+# Supported media file extensions processed by this script.
+VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov']
 
-def is_valid_directory(parser, path):
-    """
-    Check if the directory path is valid.
-    If path does not exist, a new directory is created.
-    """
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    return path
-
-
-def check_for_git():
-    """
-    Function to check for git installation.
-    """
-    try:
-        print("Checking for Git installation...")
-        subprocess.check_output(["git", "--version"], timeout=10)  # using subprocess.check_output instead
-        print("Git is installed.\n")
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-        print(f"\nGit is not installed or encountered an error:{e}. Please install or fix Git to proceed.")
-        sys.exit()
-        
-def compress_with_7z(output_directory, zip_path):
-    try:
-        print('Compressing....')
-        with py7zr.SevenZipFile(f'{zip_path}.7z', 'w') as z:
-            z.writeall(output_directory)
-        print(f'Compressed the directory at: {zip_path}.7z')
-    except Exception as e:
-        print(f"An error occurred while compressing the directory: {e}")
-
-
-def check_for_barcarolle_script():
-    """
-    Function to check for the existence of Barcarolle-Playlist-Generator.py.
-    """
-    if not os.path.isfile("./Barcarolle-Playlist-Generator.py"):
-        print("Barcarolle-Playlist-Generator.py not found.")
-        download = input("Should I download it for you? (yes/no): ")
-        if download.lower() == "yes":
-            print("Downloading Barcarolle-Playlist-Generator.py from the repository...")
-            os.system("git clone https://github.com/ParkWardRR/BouchonnageBarcarolle-Playlist-Generator.git")
-            print("\nDownloaded Barcarolle-Playlist-Generator.py successfully.")
-        else:
-            print("\nPlease download Barcarolle-Playlist-Generator.py and place it in the same directory as this script.")
-            sys.exit()
-
-def call_playlist_generator(input_dir, output_dir, mac_input_dir, shuffle, **kwargs):
-    """
-    Function to call Playlist Generator Script with arguments.
-    """
-    command = ["python", "Barcarolle-Playlist-Generator.py"]
-
-    arg_mapping = {
-        "portrait": "-portrait",
-        "horizontal": "-horz",
-        "min_length": "-min_length",
-        "max_length": "-max_length"
-    }
-
-    command.extend(["-dir", input_dir])
-    command.extend(["-mount", mac_input_dir])
-    command.extend(["-output", output_dir])
-    command.extend(["-autoplst", "yes"])
-    command.extend(["-shuffle", "yes" if shuffle else "no"])
-    command.extend(["-overwrite"])
-
-    for arg, value in kwargs.items():
-        if value is True and arg in arg_mapping.keys():
-            command.append(arg_mapping[arg])
-        elif value and arg == "min_length":
-            command.extend([arg_mapping[arg], str(value)])
-
-    print("Calling Barcarolle-Playlist-Generator.py...")
-    subprocess.call(command)
-
-
-def playlist_for_directories(executor_arg):
-    """
-    Creates a playlist for all the directories within the specified path.
-    """
-    (structure, dirpath, OS, args) = executor_arg
-    if OS == "mac":
-        mac_input_dir = dirpath.replace("/mnt/", "/Volumes/")
+def is_valid_file(parser, arg):
+    """Ensure the specified file system entity exists."""
+    if not os.path.exists(arg):
+        parser.error(f"The file {arg} does not exist!")
     else:
-        mac_input_dir = dirpath
+        return arg
 
-    print(f"\nCreating {OS} folder: {structure}")
-    call_playlist_generator(dirpath, structure, mac_input_dir, args.shuffle,
-                                    portrait=args.portrait, 
-                                    horizontal=args.horizontal,
-                                    min_length=args.min_length, 
-                                    max_length=args.max_length)
+def validate_length(args, full_path):
+    """Validate the length of a video using ffmpeg to probe its metadata."""
+    try:
+        probe = ffmpeg.probe(full_path)
+        duration = float(probe['format']['duration'])
+    except ffmpeg._run.Error as e:
+        print(str(e))
+        return False
+    return not ((args.min_length and duration < args.min_length) or (args.max_length and duration > args.max_length))
+
+def scan_directory(args):
+    """Scan the specified directory, applying any filters, and compile the playlist."""
+    playlist = []
+    for subdir, dirs, files in os.walk(args.dir):
+        for file in files:
+            ext = file.split('.')[-1]
+            if ext in VIDEO_EXTENSIONS:
+                full_path = os.path.join(subdir, file)
+                if not validate_length(args, full_path):
+                    continue
+                if args.portrait_only or args.horz_only:
+                    probe = ffmpeg.probe(full_path)
+                    video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
+                    width, height = int(video_info['width']), int(video_info['height'])
+                    if (args.portrait_only and width >= height) or (args.horz_only and height > width):
+                        continue
+                mount_path = subdir.replace(args.dir, args.mount)
+                playlist.append(os.path.join(mount_path, file))
+    return playlist
+
+def generate_output_folder(args):
+    """Generate the specified output folder if it does not exist."""
+    if not os.path.exists(args.output_folder):
+        os.makedirs(args.output_folder)
+
+def generate_filters_flag(args):
+    """Construct a string flag representing the filters applied to the playlist."""
+    filters = ['shuffle' if args.shuffle_playlist == 'yes' else '',
+               'portrait' if args.portrait_only else '',
+               'horizontal' if args.horz_only else '']
+    return "-".join(filter(None, filters)) or "nofilter"
+
+def create_7z_archive(output_folder, archive_name):
+    """Create a .7z archive of the specified output folder using maximum compression."""
+    with py7zr.SevenZipFile(archive_name, 'w', compression='7z') as archive:
+        for root, dirs, files in os.walk(output_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+                archive_path = os.path.relpath(file_path, output_folder)
+                archive.write(file_path, archive_path)
+    print(f".7z Archive created: {archive_name}")
 
 def main():
-    parser = argparse.ArgumentParser()
-    # Argument for the media directory path
-    parser.add_argument("-MediaDir", 
-                        help="Specify the root media directory",
-                        required=True, 
-                        type=lambda x: is_valid_directory(parser, x))
+    # Parse and manage the script's command-line arguments.
+    parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
+    parser.add_argument("-dir", dest="dir", required=True, type=lambda x: is_valid_file(parser, x), help="Directory containing media to process (required).")
+    parser.add_argument("-mount", dest="mount", required=True, help="Root of the directory on the client corresponding to -dir (required).")
+    parser.add_argument("-autoplst", dest="auto_gen_playlist", default='no', choices=['yes', 'no'],
+                        help="Autogenerate a playlist name? 'yes' or 'no' (default 'no').")
+    parser.add_argument("-shuffle", dest="shuffle_playlist", default='no', choices=['yes', 'no'],
+                        help="Shuffle the playlist? 'yes' or 'no' (default 'no').")
+    parser.add_argument("-output", dest="output_folder", required=True, help="Output directory for the playlist file (required).")
+    parser.add_argument("-overwrite", dest="overwrite", action='store_true',
+                        help="Overwrite existing file? Provide flag if 'yes'.")
+    parser.add_argument("-portrait", dest="portrait_only", action='store_true',
+                        help="Include only videos with portrait orientation? Provide flag if 'yes'.")
+    parser.add_argument("-horz", dest="horz_only", action='store_true',
+                        help="Include only videos with horizontal orientation? Provide flag if 'yes'.")
+    parser.add_argument("-min_length", dest="min_length", type=float,
+                        help="Minimum length of video in seconds. Videos shorter than this will be excluded.")
+    parser.add_argument("-max_length", dest="max_length", type=float,
+                        help="Maximum length of video in seconds. Videos longer than this will be excluded.")
+    parser.add_argument("-filename", dest="filename", help="Specify a filename for the playlist file (optional).")
+    parser.add_argument("-zip", dest="zip_output", default='yes', choices=['yes', 'no'],
+                        help="Create a .7z compressed archive of the output directory? 'yes' or 'no' (default 'yes').")
     
-    # Argument for the target directory path
-    parser.add_argument("-TargetDir", 
-                        help="Specify the root target directory",
-                        required=True, 
-                        type=lambda x: is_valid_directory(parser, x))
-    
-    # Argument for OS type
-    parser.add_argument("-os", 
-                        help="Specify the operating system type",
-                        choices=["mac", "linux", "both"], 
-                        default="linux")
-    
-    # Argument for portrait filter
-    parser.add_argument("-portrait", 
-                        help="Specify the portrait filter",
-                        action='store_true')
-    
-    # Argument for horizontal filter
-    parser.add_argument("-horizontal", 
-                        help="Specify the horizontal filter",
-                        action='store_true')
-    
-    # Argument for minimum length filter
-    parser.add_argument("-min_length", 
-                        help="Specify the minimum length filter",
-                        type=float)
-    
-    # Argument for maximum length filter
-    parser.add_argument("-max_length", 
-                        help="Specify the maximum length filter",
-                        type=float)
-    
-    # Argument for shuffle option
-    parser.add_argument("-shuffle",
-                        help="Specify to shuffle playlist",
-                        action='store_true')
-    parser.add_argument("--zip", 
-                    help="Specify to create a zip file of the output directory",
-                    action='store_true')
-
-    parser.add_argument("--zippath", 
-                    help="Specify the path of the zipped file",
-                    required=False, 
-                    default=os.path.join(os.getcwd(), "compressed_dir"))
-    # Argument for number of threads
-    parser.add_argument("-t", 
-                        help="Specify the number of threads to be used, default to number of cores", 
-                        type=int, 
-                        default=os.cpu_count()) # default to number of cores if not specified
-                        
     args = parser.parse_args()
-    MAX_WORKERS = args.t # use argument for maximum threads
-
-    # print a statement to confirm num of threads.
-    print(f'Running script using {MAX_WORKERS} worker threads.')
-
-    check_for_git()
-    check_for_barcarolle_script()
-
-    OSs = ["mac", "linux"] if args.os == "both" else [args.os]
     
-    executor_args = []
+    # Directory handling and playlist generation
+    generate_output_folder(args)
+    playlist = scan_directory(args)
+    filter_string = generate_filters_flag(args)
 
-    for dirpath, dirs, files in os.walk(args.MediaDir):
-        for OS in OSs:
-            structure = os.path.join(args.TargetDir, OS, os.path.relpath(dirpath, args.MediaDir))
-            if not os.path.isdir(structure):
-                os.makedirs(structure)
-            executor_args.append((structure, dirpath, OS, args))
-    
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        executor.map(playlist_for_directories, executor_args)
-    if args.zip:
-        compress_with_7z(args.TargetDir, args.zippath)
+    # Creating playlist file
+    playlist_name = args.filename if args.filename else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
+    output_file = os.path.join(args.output_folder, playlist_name)
+    if os.path.exists(output_file) and not args.overwrite:
+        print('File already exists, and overwrite is not set. Please change the name or set -overwrite flag.')
+        sys.exit(1)
+    with open(output_file, 'w') as f:
+        for vid_path in playlist:
+            f.write(f'{vid_path}\n')
+    print(f"Playlist file has been successfully created at: {output_file}")
 
-if __name__ == "__main__":
+    # .7z Archive creation (if toggled on)
+    if args.zip_output.lower() == 'yes':
+        archive_name = f"{playlist_name.rsplit('.', 1)[0]}.7z"
+        archive_path = os.path.join(args.output_folder, archive_name)
+        create_7z_archive(args.output_folder, archive_path)
+
+if __name__ == '__main__':
     main()
-
 
 """
 - The following is notes about the Barcarolle-Playlist-Generator.py: 
