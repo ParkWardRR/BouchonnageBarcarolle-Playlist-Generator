@@ -115,7 +115,11 @@ def generate_filters_flag(args):
 
 def create_7z_archive(output_folder, archive_name):
     """Create a .7z archive of the specified output folder using maximum compression."""
-    with py7zr.SevenZipFile(archive_name, 'w', compression='7z') as archive:
+    compression = {
+      "id": py7zr.FILTER_LZMA2,
+      "preset": 9  # LZMA2 maximum compression preset
+    }
+    with py7zr.SevenZipFile(archive_name, 'w', filters=[compression]) as archive:
         for root, dirs, files in os.walk(output_folder):
             for file in files:
                 file_path = os.path.join(root, file)
