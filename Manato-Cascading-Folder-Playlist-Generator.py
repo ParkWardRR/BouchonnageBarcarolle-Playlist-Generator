@@ -71,7 +71,7 @@ def validate_length(args, full_path):
     """Validate the length of a video using ffmpeg to probe its metadata."""
     try:
         probe = ffmpeg.probe(full_path)
-        duration = float(probe['format'].get('duration', '0'))  # Change made here
+        duration = float(probe['format']['duration'])
     except ffmpeg._run.Error as e:
         print(str(e))
         return False
