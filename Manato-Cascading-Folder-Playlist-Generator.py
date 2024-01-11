@@ -71,6 +71,10 @@ def validate_length(args, full_path):
     """Validate the length of a video using ffmpeg to probe its metadata."""
     try:
         probe = ffmpeg.probe(full_path)
+        video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
+        if video_info is None:
+            print(f"File: {full_path} is not a valid video. Skipping...")
+            return False
         if 'duration' in probe['format']:
             duration = float(probe['format']['duration'])
         else:
@@ -87,7 +91,7 @@ def scan_directory(args):
     for subdir, dirs, files in os.walk(args.dir):
         for file in files:
             ext = file.split('.')[-1]
-            if ext in VIDEO_EXTENSIONS:
+            if ext.lower() in VIDEO_EXTENSIONS:
                 full_path = os.path.join(subdir, file)
                 if not validate_length(args, full_path):
                     continue
@@ -99,6 +103,8 @@ def scan_directory(args):
                         continue
                 mount_path = subdir.replace(args.dir, args.mount)
                 playlist.append(os.path.join(mount_path, file))
+            else:
+                print(f"File: {os.path.join(subdir, file)} is not a recognizable video format. Skipping...")      
     return playlist
 
 def generate_output_folder(args):
