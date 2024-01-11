@@ -97,16 +97,16 @@ def main():
 
     print("{:<10} {:<10}".format("Extension", "Count"))
     for ext_type, exts in search_types.items():
-        if not vars(args)[ext_type] and any(vars(args).values()): 
+        if any(vars(args).values()) and not vars(args)[ext_type]: 
             continue
         print(f"{'-' * 20} {ext_type.upper()} {'-' * 20}")
         for ext in exts:
             if counts[ext] > 0:
                 print("{:<10} {:<10}".format(ext.upper(), counts[ext]))
 
-    print("\n{:<10} {:<10}".format("Total Files:", total_files))
-    print("{:<10} {:.2f} seconds".format("Total Time Spent:", execution_time))
-    print("{:<10} {:.2f} files/second".format("Performance Index:", performance_index))
+    print("\n{:<15} {:<10}".format("Total Files:", total_files))
+    print("{:<15} {:.2f} seconds".format("Total Time Spent:", execution_time))
+    print("{:<15} {:.2f} files/second".format("Performance Index:", performance_index))
 
 if __name__ == '__main__':
     main()
