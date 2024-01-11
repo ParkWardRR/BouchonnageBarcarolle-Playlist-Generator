@@ -58,7 +58,7 @@ import ffmpeg
 import py7zr
 
 # Supported media file extensions processed by this script.
-VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov']
+VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'm4v', 'webm', '3gp', 'ogv', 'mpg', 'mpeg', 'm2v', 'm4p', 'm4v', 'mp2', 'mpe', 'mpv', 'm2ts', 'mxf', 'yuv', 'rm', 'asf', 'vob', 'amv', 'rmvb', 'drc', 'gifv', 'mts', 'mts', 'm2ts', 'qt', 'svi', '3g2', 'roq', 'nsv', 'f4v', 'f4p', 'f4a', 'f4b']
 
 def is_valid_file(parser, arg):
     """Ensure the specified file system entity exists."""
