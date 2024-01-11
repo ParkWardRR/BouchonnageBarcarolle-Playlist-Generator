@@ -60,12 +60,15 @@ import py7zr
 # Supported media file extensions processed by this script.
 VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov']
 
-def is_valid_file(parser, arg):
-    """Ensure the specified file system entity exists."""
-    if not os.path.exists(arg):
-        parser.error(f"The file {arg} does not exist!")
-    else:
-        return arg
+def validate_length(args, full_path):
+    """Validate the length of a video using ffmpeg to probe its metadata."""
+    try:
+        probe = ffmpeg.probe(full_path)
+        duration = float(probe['format'].get('duration', '0'))  # Change made here
+    except ffmpeg._run.Error as e:
+        print(str(e))
+        return False
+    return not ((args.min_length and duration < args.min_length) or (args.max_length and duration > args.max_length))
 
 def validate_length(args, full_path):
     """Validate the length of a video using ffmpeg to probe its metadata."""
