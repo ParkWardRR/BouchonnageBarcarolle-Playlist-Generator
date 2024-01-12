@@ -84,9 +84,9 @@ def main(config_file):
 
         except yaml.YAMLError as err:
             print(err)
-
 def generate_sample_yaml_file(config_file):
     # Generate a sample YAML configuration file with default values
+    print("Generating configuration file...")
     try:
         data = {
             'dirs': ['/path/to/dir1', '/path/to/dir2'],
@@ -106,10 +106,19 @@ def generate_sample_yaml_file(config_file):
 
         with open(config_file, 'w') as outfile:
             yaml.dump(data, outfile, default_flow_style=False)
+        print(f"Configuration file generated at: {config_file}")
     except Exception as e:
         print(f"An error occurred during sample configuration file generation: {e}")
 
+# the function you import from another module
+def is_valid_file(parser, x):
+    if not os.path.isfile(x):
+        parser.error("The file %s does not exist!" % x)
+    else:
+        return x
+
 if __name__ == '__main__':
+    print("Running script...")
     parser = argparse.ArgumentParser(description="Manato-Playlist-Generator. Provide a YAML config file or generate a sample one.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-config', dest="config_file", type=lambda x: is_valid_file(parser, x), help="Path to the YAML configuration file (required).")
@@ -117,6 +126,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.config_file:
+        print("Running main function...")
         main(args.config_file)
     else:
         generate_sample_yaml_file(args.sample_config_file if args.sample_config_file else 'Manato-Cascading-Folder-Playlist-Generator.config.yaml')
