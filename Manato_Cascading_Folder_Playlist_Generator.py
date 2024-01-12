@@ -73,6 +73,12 @@ def main(config_file):
 
                         for os_type, os_mount in zip(config['os_types'], config['os_mounts']):
                             config['mount'] = os_mount
+                            
+                            # Defaulting fields if they are missing in config
+                            config['portrait_only'] = config.get('portrait_only', False)
+                            config['horz_only'] = config.get('horz_only', False)
+                            config['min_length'] = config.get('min_length', None)
+                            config['max_length'] = config.get('max_length', None)
 
                             # Convert the config dictionary back to an argparse.Namespace object
                             config_namespace = argparse.Namespace(**config)
@@ -89,6 +95,8 @@ def main(config_file):
 
         except yaml.YAMLError as err:
             print(err)
+
+
 def generate_sample_yaml_file(config_file):
     # Generate a sample YAML configuration file with default values
     print("Generating configuration file...")
