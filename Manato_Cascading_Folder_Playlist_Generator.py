@@ -114,7 +114,7 @@ def generate_sample_yaml_file(config_file):
             'portrait_only': False,
             'horz_only': False,
             'zip_output': 'yes'
-            }
+            
         
         }
 
