@@ -125,9 +125,9 @@ def generate_output_folder(args):
 
 def generate_filters_flag(arg_dict):
     """Construct a string flag representing the filters applied to the playlist."""
-    filters = ['shuffle' if arg_dict['shuffle_playlist'] else '',
-               'portrait' if args.portrait_only else '',
-               'horizontal' if args.horz_only else '']
+    filters = ['shuffle' if arg_dict.shuffle_playlist else '',
+               'portrait' if arg_dict.portrait_only else '',
+               'horizontal' if arg_dict.horz_only else '']
     return "-".join(filter(None, filters)) or "nofilter"
 
 def create_7z_archive(output_folder, archive_name):
@@ -143,10 +143,10 @@ def create_7z_archive(output_folder, archive_name):
                 archive_path = os.path.relpath(file_path, output_folder)
                 archive.write(file_path, archive_path)
     print(f".7z Archive created: {archive_name}")
-def main(arg_dict):  # note: changed 'args' to 'arg_dict'
+def main(args):  # note: changing 'arg_dict' to 'args'
     # Directory handling and playlist generation
-    generate_output_folder(arg_dict)
-    playlist = scan_directory(arg_dict)
+    generate_output_folder(args)
+    playlist = scan_directory(args)
     filter_string = generate_filters_flag(arg_dict)
 
     # Creating playlist file
