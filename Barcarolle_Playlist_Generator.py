@@ -118,10 +118,11 @@ def scan_directory(args):
                 print(f"File: {os.path.join(subdir, file)} is not a recognizable video format. Skipping...")      
     return playlist
 
-def generate_output_folder(args):
+def generate_output_folder(arg_dict):
     """Generate the specified output folder if it does not exist."""
-    if not os.path.exists(args.output_folder):
-        os.makedirs(args.output_folder)
+    if not os.path.exists(arg_dict['output_folder']):
+        os.makedirs(arg_dict['output_folder'])
+
 
 def generate_filters_flag(arg_dict):
     """Construct a string flag representing the filters applied to the playlist."""
