@@ -66,20 +66,25 @@ def main(config_file):
                     if subdir.is_dir():
                         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                         config['dir'] = subdir.path
-                        config['output'] = Path(config['output_dir'], subdir.name + '-' + timestamp)     # Appending time stamp to output folder
+                        config['output_folder'] = Path(config['output_dir'], subdir.name + '-' + timestamp)     # Appending time stamp to output folder
 
                         # Checks and creates output directories if they don't exist
-                        os.makedirs(config['output'], exist_ok=True)
+                        os.makedirs(config['output_folder'], exist_ok=True)
 
                         for os_type, os_mount in zip(config['os_types'], config['os_mounts']):
                             config['mount'] = os_mount
-                            barcarolle_main(config)
+
+                            # Convert the config dictionary back to an argparse.Namespace object
+                            config_namespace = argparse.Namespace(**config)
+
+                            barcarolle_main(config_namespace)
+
                             archive_name = f"{subdir.name}-{os_type}-{timestamp}.7z"
-                            archive_path = os.path.join(config['output'], archive_name)
+                            archive_path = os.path.join(config['output_folder'], archive_name)
 
                             # Archive creation
                             with py7zr.SevenZipFile(archive_path, mode='w') as archive:
-                                archive.writeall(config['output'], arcname="/")
+                                archive.writeall(config['output_folder'], arcname="/")
                             print(f".7z Archive created: {archive_path}")
 
         except yaml.YAMLError as err:
