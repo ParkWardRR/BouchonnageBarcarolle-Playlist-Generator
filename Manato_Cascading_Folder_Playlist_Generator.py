@@ -80,8 +80,7 @@ def main(config_file):
                             config['min_length'] = config.get('min_length', None)
                             config['max_length'] = config.get('max_length', None)
                             config['shuffle_playlist'] = config.get('shuffle_playlist', 'no')  # defaulting to 'no' if missing
-
-                           config_namespace = argparse.Namespace(**config)
+                            config_namespace = argparse.Namespace(**config)
 
                         
                             barcarolle_main(config_namespace)  # instead of barcarolle_main(config)
