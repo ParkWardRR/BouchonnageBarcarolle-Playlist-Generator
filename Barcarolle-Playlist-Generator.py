@@ -16,6 +16,8 @@ python Barcarolle-Playlist-Generator.py -dir /path/to/media -mount /client/media
 For Mac specific playlist run:
 python Barcarolle-Playlist-Generator.py -dir /path/to/media/ -mount /client/media/ -autoplst yes -shuffle yes -overwrite -horz -output /path/to/output
 
+ If you run the script on a VM and aim to use the generated playlist on your macOS laptop, the -dir flag represents the path on the VM, and the -mount flag provides the equivalent path on your macOS laptop
+
 Parameters Table:
 --------------------
 | Flag         | Input Type     | Default  | Description                                                     | Example                                               |
