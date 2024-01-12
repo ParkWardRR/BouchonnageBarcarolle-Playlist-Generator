@@ -139,7 +139,7 @@ def main(args):
     playlist = scan_directory(args)
     filter_string = generate_filters_flag(args)
     
-    playlist_name = args.filename if args.filename else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
+    playlist_name = getattr(args, 'filename', f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8')
     output_file = os.path.join(args.output, playlist_name)
     if os.path.exists(output_file) and not args.overwrite:
         print('File already exists, and overwrite is not set. Please change the name or set -overwrite flag.')
