@@ -145,15 +145,14 @@ def create_7z_archive(output_folder, archive_name):
     print(f".7z Archive created: {archive_name}")
 
 
-def main(args):  # note: changing 'arg_dict' to 'args'
-    # Directory handling and playlist generation
-    generate_output_folder(args)
-    playlist = scan_directory(args)
-    
+def main(args):  
     # Convert the namespace args to a dictionary
     arg_dict = vars(args)
 
-    # Pass the dictionary arg_dict
+    # Directory handling and playlist generation
+    generate_output_folder(arg_dict)
+    playlist = scan_directory(arg_dict)
+    
     filter_string = generate_filters_flag(arg_dict)
 
     # Creating playlist file
