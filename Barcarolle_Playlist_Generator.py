@@ -99,7 +99,7 @@ def scan_directory(args):
                 full_path = os.path.join(subdir, file)
                 if not validate_length(args, full_path):
                     continue
-                if args.portrait or args.horz:
+                if getattr(args, 'portrait', False) or getattr(args, 'horz', False):
                     probe = ffmpeg.probe(full_path)
                     video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
                     width, height = int(video_info['width']), int(video_info['height'])
