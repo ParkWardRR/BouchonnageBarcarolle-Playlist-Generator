@@ -112,7 +112,7 @@ def scan_directory(args):
     return playlist
 
 def generate_output_folder(args):
-    if not os.path.exists(args['output']):
+    if not os.path.exists(args.output):
         os.makedirs(args['output'])
 
 def generate_filters_flag(args):
