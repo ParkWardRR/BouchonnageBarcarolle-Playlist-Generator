@@ -96,6 +96,9 @@ def validate_length(args, full_path):
 def scan_directory(args):
     """Scan the specified directory, applying any filters, and compile the playlist."""
     playlist = []
+    portrait_only = getattr(args, 'portrait_only', False)
+    horz_only = getattr(args, 'horz_only', False)
+
     for subdir, dirs, files in os.walk(args.dir):
         for file in files:
             ext = file.split('.')[-1]
@@ -103,11 +106,11 @@ def scan_directory(args):
                 full_path = os.path.join(subdir, file)
                 if not validate_length(args, full_path):
                     continue
-                if args.portrait_only or args.horz_only:
+                if portrait_only or horz_only:
                     probe = ffmpeg.probe(full_path)
                     video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
                     width, height = int(video_info['width']), int(video_info['height'])
-                    if (args.portrait_only and width >= height) or (args.horz_only and height > width):
+                    if (portrait_only and width >= height) or (horz_only and height > width):
                         continue
                 mount_path = subdir.replace(args.dir, args.mount)
                 playlist.append(os.path.join(mount_path, file))
