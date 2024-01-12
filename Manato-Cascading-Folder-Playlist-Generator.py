@@ -1,49 +1,51 @@
+
 #!/usr/bin/env python3
-# Manato-Cascading-Folder-Playlist-Generator.py
+# Barcarolle-Playlist-Generator.py
 
 """
-Sample Execution Commands:
+Run the script like:
 --------------------------
 To generate a playlist without any filters and without creating an archive:
-python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -autoplst yes -zip no
+python Barcarolle-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -autoplst yes -zip no
 
-To generate a playlist with shuffled content and a minimum video length of 30 seconds, and archive the result:
-python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -shuffle yes -min_length 30
+To generate a playlist with shuffled content and a minimum video length of 30 seconds, and archiving the result:
+python Barcarolle-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -shuffle yes -min_length 30
 
 To generate a playlist of horizontal videos only, a specified filename for the playlist, and create an archive:
-python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -filename my_horizontal_playlist.m3u8 -horz -zip yes
+python Barcarolle-Playlist-Generator.py -dir /path/to/media -mount /client/media -output /path/to/output -filename my_horizontal_playlist.m3u8 -horz -zip yes
 
 For Mac specific playlist run:
-python Manato-Cascading-Folder-Playlist-Generator.py -dir /path/to/media/ -mount /client/media/ -autoplst yes -shuffle yes -overwrite -horz -output /path/to/output
+python Barcarolle-Playlist-Generator.py -dir /path/to/media/ -mount /client/media/ -autoplst yes -shuffle yes -overwrite -horz -output /path/to/output
 
 Parameters Table:
------------------
+--------------------
 | Flag         | Input Type     | Default  | Description                                                     | Example                                               |
-|--------------|----------------|----------|-----------------------------------------------------------------|-------------------------------------------------------|
-| -dir         | str (required) | -        | Directory containing media to process.                          | -dir /path/to/media                                   |
-| -mount       | str (required) | -        | Root of the directory on the client corresponding to -dir.      | -mount /client/media                                  |
-| -autoplst    | str            | no       | Autogenerate a playlist name? 'yes' or 'no'.                    | -autoplst yes                                         |
-| -shuffle     | str            | no       | Shuffle the playlist? 'yes' or 'no'.                            | -shuffle yes                                          |
-| -output      | str (required) | -        | Output directory for the playlist file.                         | -output /path/to/output                               |
-| -overwrite   | flag           | False    | Overwrite existing file if necessary.                           | -overwrite                                            |
-| -portrait    | flag           | False    | Include only videos with portrait orientation?                  | -portrait                                             |
-| -horz        | flag           | False    | Include only videos with horizontal orientation?                | -horz                                                 |
-| -min_length  | float          | -        | Minimum length of video in seconds to include.                  | -min_length 30                                        |
-| -max_length  | float          | -        | Maximum length of video in seconds to include.                  | -max_length 120                                       |
-| -filename    | str            | -        | Specify a filename for the playlist file.                       | -filename custom_playlist.m3u8                       |
-| -zip         | str            | yes      | Create a .7z compressed archive of the output directory? 'yes' or 'no'. | -zip no                                 |
+|---------------|------------------|------------|--------------------------------------------------------------------|----------------------------------------------------------|
+| -dir          | str (required)  | -           | Directory containing media to process.                           | -dir /path/to/media                                    |
+| -mount      | str (required)  | -           | Root directory on client corresponding to -dir.       | -mount /client/media                                   |
+| -autoplst    | str                | no        | Autogenerate a playlist name? 'yes' or 'no'.               | -autoplst yes                                          |
+| -shuffle     | str                | no        | Shuffle the playlist? 'yes' or 'no'.                          | -shuffle yes                                           |
+| -output      | str (required)  | -           | Output directory for the playlist file.                       | -output /path/to/output                                |
+| -overwrite | flag                | False   | Overwrite existing file if necessary.                        | -overwrite                                             |
+| -portrait  | flag                | False   | Include only videos with portrait orientation?           | -portrait                                              |
+| -horz        | flag                | False   | Include only videos with horizontal orientation?         | -horz                                                  |
+| -min_length | float             | -           | Include videos longer than this value in seconds.      | -min_length 30                                         |
+| -max_length | float             | -           | Include videos shorter than this value in seconds.    | -max_length 120                                       |
+| -filename   | str                 | -           | Specify a filename for the playlist file.                  | -filename custom_playlist.m3u8                      |
+| -zip          | str                 | yes       | Create a .7z compressed archive of output? 'yes' or 'no'.| -zip no                                               |
 
-Note: Replace the placeholder paths with actual paths on your system where appropriate.
-Additional Script Notes:
-- Dependencies: ffmpeg, ffprobe, ffmpeg-python, and pip.
-- Use command line arguments for specifying options (via argparse).
-- Validity checks are performed for directory and file existence.
-- Dependencies are checked at runtime; if missing, they're installed via pip.
-- `scan_directory`: Scans for videos, filters by length and orientation.
-- `generate_filters_flag`: Defines flags for video selection based on user input.
-- `generate_output_folder`: Ensures the output folder exists.
-- `main()`: Orchestrates the overall playlist generation process.
+Note: Replace the placeholder paths with real paths on your system as needed.
+For more about Barcarolle-Playlist-Generator.py:
+- Dependencies: ffmpeg, ffprobe, ffmpeg-python, pip.
+- Use command line arguments per argparse for options.
+- Performs validity checks for directory and file existence.
+- Checks dependencies at runtime; installs missing ones via pip.
+- 'scan_directory': Scans for videos, filters by length and orientation.
+- 'generate_filters_flag': Defines video selection flags based on user input.
+- 'generate_output_folder': Makes sure the output folder is available.
+- 'main()': Runs the overall playlist generation process.
 ------
+
 """
 # Standard library imports
 import os
@@ -184,26 +186,27 @@ def main():
 if __name__ == '__main__':
     main()
 
+
 """
-- The following is notes about the Barcarolle-Playlist-Generator.py: 
-- This script dependencies are: ffmpeg, ffprobe, ffmpeg-python, and pip. 
-- To call this program, command line arguments are taken using argparse. 
-- -dir argument specifies the directory to scan. This is mandatory and must be a valid path on the file system.
-- -mount argument corresponds to the client root directory of '-dir'. It's a mandatory field but no validation is enforced. (this is useful when specififying the mac path - See below for the "Run for mac playlists")
-- -autoplst (default 'no') lets user autogenerate a playlist name. Options are 'yes' and 'no'.
-- -shuffle (default 'no') if set to 'yes', shuffles the playlist. Acceptable options are 'yes' and 'no'.
-- -output specifies an output directory for the playlist file. It's mandatory.
-- Providing -overwrite flag overwrites any existing file in the output directory.
-- The -portrait flag only includes vertically oriented videos if provided.
-- The -horz flag only includes horizontally oriented videos when used.
-- -min_length filters videos shorter than the specified value in seconds.
-- -max_length filters out videos longer than the specified value in seconds.
-- -filename allows a user to specify a filename for the playlist file.
-- The argparse setup also includes a validity check for the provided directory and the file existence.
-- Required dependencies checked at runtime; if not found, they're installed via pip (`check_dependencies` function).
-- scan_directory function scans provided directory recursively for video files of specific extensions, filters on the basis of length and orientation and populates a playlist.
-- generate_filters_flag function defines video selection flags based on user preferences.
-- generate_output_folder function creates an output folder if it doesn't exist.
-- The main() function runs the overall playlist generation process.
+- The following is more about the Barcarolle-Playlist-Generator.py: 
+- It depends on ffmpeg, ffprobe, ffmpeg-python, and pip. 
+- Use command line arguments to specify options (utilizes argparse). 
+- '-dir' specifies the directory to scan. It's mandatory and must be a valid path on file system.
+- '-mount' is the client's root directory equivalent to '-dir'. Mandatory field but no validation is enforced.
+- '-autoplst' (default 'no') determines if a playlist name should be auto-generated. Options are 'yes' and 'no'.
+- '-shuffle' (default 'no'), if set to 'yes', shuffles the playlist. Options are 'yes' and 'no'.
+- '-output' is required to specify an output directory for playlist file.
+- The '-overwrite' flag overwrites an existing file in the output directory if provided.
+- Including '-portrait' flag only includes videos with vertical orientation.
+- Including '-horz' flag only includes videos with horizontal orientation.
+- Define '-min_length' in seconds to filter out videos shorter than this value.
+- Define '-max_length' in seconds to filter out videos longer than this value.
+- If provided, '-filename' allows to specify a filename for the playlist file.
+- In addition to argument parsing, the script checks for the validity of the provided directory and the existence of files.
+- The dependencies are checked at runtime; if not there, script installs them via pip ('check_dependencies' function).
+- The 'scan_directory' function scans the provided directory for video files with specific extensions, filters based on length and orientation and creates the playlist.
+- 'generate_filters_flag' function sets up video selection flags based on user's preferences.
+- 'generate_output_folder' function creates the output folder if it doesn't exist.
+- 'main()' function operates the overall playlist generation process.
 ------
 """
