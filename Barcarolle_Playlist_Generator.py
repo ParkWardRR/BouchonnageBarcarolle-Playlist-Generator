@@ -51,7 +51,7 @@ For more about Barcarolle_Playlist_Generator.py:
 
 """
 
-# Standard library imports
+
 import os
 import argparse
 import random
@@ -63,18 +63,15 @@ from datetime import datetime
 import ffmpeg
 import py7zr
 
-# Supported media file extensions processed by this script.
 VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'm4v', 'webm', '3gp', 'ogv', 'mpg', 'mpeg', 'm2v', 'm4p', 'm4v', 'mp2', 'mpe', 'mpv', 'm2ts', 'mxf', 'yuv', 'rm', 'asf', 'vob', 'amv', 'rmvb', 'drc', 'gifv', 'mts', 'mts', 'm2ts', 'qt', 'svi', '3g2', 'roq', 'nsv', 'f4v', 'f4p', 'f4a', 'f4b']
 
 def is_valid_file(parser, arg):
-    """Ensure the specified file system entity exists."""
     if not os.path.exists(arg):
         parser.error(f"The file {arg} does not exist!")
     else:
         return arg
 
 def validate_length(args, full_path):
-    """Validate the length of a video using ffmpeg to probe its metadata."""
     try:
         probe = ffmpeg.probe(full_path)
         video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
@@ -94,45 +91,37 @@ def validate_length(args, full_path):
     return not ((min_length and duration < min_length) or (max_length and duration > max_length))
 
 def scan_directory(args):
-    """Scan the specified directory, applying any filters, and compile the playlist."""
     playlist = []
-    portrait_only = getattr(args, 'portrait_only', False)
-    horz_only = getattr(args, 'horz_only', False)
-
-    for subdir, dirs, files in os.walk(args.dir):
+    for subdir, dirs, files in os.walk(args['dir']):
         for file in files:
             ext = file.split('.')[-1]
             if ext.lower() in VIDEO_EXTENSIONS:
                 full_path = os.path.join(subdir, file)
                 if not validate_length(args, full_path):
                     continue
-                if portrait_only or horz_only:
+                if args['portrait'] or args['horz']:
                     probe = ffmpeg.probe(full_path)
                     video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
                     width, height = int(video_info['width']), int(video_info['height'])
-                    if (portrait_only and width >= height) or (horz_only and height > width):
+                    if (args['portrait'] and width >= height) or (args['horz'] and height > width):
                         continue
-                mount_path = subdir.replace(args.dir, args.mount)
+                mount_path = subdir.replace(args['dir'], args['mount'])
                 playlist.append(os.path.join(mount_path, file))
             else:
-                print(f"File: {os.path.join(subdir, file)} is not a recognizable video format. Skipping...")      
+                print(f"File: {os.path.join(subdir, file)} is not a recognizable video format. Skipping...")
     return playlist
-    
-def generate_output_folder(arg_dict):
-    """Generate the specified output folder if it does not exist."""
-    if not os.path.exists(arg_dict['output_folder']):
-        os.makedirs(arg_dict['output_folder'])
 
+def generate_output_folder(args):
+    if not os.path.exists(args['output']):
+        os.makedirs(args['output'])
 
-def generate_filters_flag(arg_dict):
-    """Construct a string flag representing the filters applied to the playlist."""
-    filters = ['shuffle' if arg_dict.shuffle_playlist else '',
-               'portrait' if arg_dict.portrait_only else '',
-               'horizontal' if arg_dict.horz_only else '']
+def generate_filters_flag(args):
+    filters = ['shuffle' if args['shuffle'] == 'yes' else '',
+               'portrait' if args['portrait'] else '',
+               'horz' if args['horz'] else '']
     return "-".join(filter(None, filters)) or "nofilter"
 
 def create_7z_archive(output_folder, archive_name):
-    """Create a .7z archive of the specified output folder using maximum compression."""
     compression = {
       "id": py7zr.FILTER_LZMA2,
       "preset": 9  # LZMA2 maximum compression preset
@@ -145,26 +134,14 @@ def create_7z_archive(output_folder, archive_name):
                 archive.write(file_path, archive_path)
     print(f".7z Archive created: {archive_name}")
 
-
 def main(args):
-    # Convert the namespace args to a dictionary
-    arg_dict = vars(args)
-
-    # Directory handling and playlist generation
-def generate_output_folder(arg_dict):
-    """Generate the specified output folder if it does not exist."""
-    if not os.path.exists(arg_dict['output_folder']):
-        os.makedirs(arg_dict['output_folder'])
-
+    generate_output_folder(args)
+    playlist = scan_directory(args)
+    filter_string = generate_filters_flag(args)
     
-    playlist = scan_directory(arg_dict)
-
-    filter_string = generate_filters_flag(arg_dict)
-
-    # Creating playlist file
-    playlist_name = arg_dict['filename'] if arg_dict['filename'] else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
-    output_file = os.path.join(arg_dict['output_folder'], playlist_name)
-    if os.path.exists(output_file) and not arg_dict['overwrite']:
+    playlist_name = args['filename'] if args['filename'] else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
+    output_file = os.path.join(args['output'], playlist_name)
+    if os.path.exists(output_file) and not args['overwrite']:
         print('File already exists, and overwrite is not set. Please change the name or set -overwrite flag.')
         sys.exit(1)
     with open(output_file, 'w') as f:
@@ -172,22 +149,28 @@ def generate_output_folder(arg_dict):
             f.write(f'{vid_path}\n')
     print(f"Playlist file has been successfully created at: {output_file}")
 
-    # .7z Archive creation (if toggled on)
-    if arg_dict['zip_output'].lower() == 'yes':
+    if args['zip'] == 'yes':
         archive_name = f"{playlist_name.rsplit('.', 1)[0]}.7z"
-        archive_path = os.path.join(arg_dict['output_folder'], archive_name)
-        create_7z_archive(arg_dict['output_folder'], archive_path)
+        archive_path = os.path.join(args['output'], archive_name)
+        create_7z_archive(args['output'], archive_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
-    # ... specify other arguments here ...
+    parser.add_argument('-dir', required=True, help="Directory containing media to process.")
+    parser.add_argument('-mount', required=True, help="Root directory on client corresponding to -dir.")
+    parser.add_argument('-autoplst', default='no', help="Autogenerate a playlist name? 'yes' or 'no'.")
+    parser.add_argument('-shuffle', default='no', help="Shuffle the playlist? 'yes' or 'no'.")
+    parser.add_argument('-output', required=True, help="Output directory for the playlist file.")
+    parser.add_argument('-overwrite', action='store_true', help="Overwrite existing file if necessary.")
+    parser.add_argument('-portrait', action='store_true', help="Include only videos with portrait orientation?")
+    parser.add_argument('-horz', action='store_true', help="Include only videos with horizontal orientation?")
+    parser.add_argument('-min_length', type=float, help="Include videos longer than this value in seconds.")
+    parser.add_argument('-max_length', type=float, help="Include videos shorter than this value in seconds.")
+    parser.add_argument('-filename', help="Specify a filename for the playlist file.")
+    parser.add_argument('-zip', default='yes', help="Create a .7z compressed archive of output? 'yes' or 'no'.")
 
     args = parser.parse_args()
-    
-    # Convert the namespace to a dictionary
     arg_dict = vars(args)
-
-    # Call the 'main' function with the dictionary as argument
     main(arg_dict)
 
 
