@@ -138,42 +138,16 @@ def create_7z_archive(output_folder, archive_name):
                 archive_path = os.path.relpath(file_path, output_folder)
                 archive.write(file_path, archive_path)
     print(f".7z Archive created: {archive_name}")
-
-def main():
-    # Parse and manage the script's command-line arguments.
-    parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
-    parser.add_argument("-dir", dest="dir", required=True, type=lambda x: is_valid_file(parser, x), help="Directory containing media to process (required).")
-    parser.add_argument("-mount", dest="mount", required=True, help="Root of the directory on the client corresponding to -dir (required).")
-    parser.add_argument("-autoplst", dest="auto_gen_playlist", default='no', choices=['yes', 'no'],
-                        help="Autogenerate a playlist name? 'yes' or 'no' (default 'no').")
-    parser.add_argument("-shuffle", dest="shuffle_playlist", default='no', choices=['yes', 'no'],
-                        help="Shuffle the playlist? 'yes' or 'no' (default 'no').")
-    parser.add_argument("-output", dest="output_folder", required=True, help="Output directory for the playlist file (required).")
-    parser.add_argument("-overwrite", dest="overwrite", action='store_true',
-                        help="Overwrite existing file? Provide flag if 'yes'.")
-    parser.add_argument("-portrait", dest="portrait_only", action='store_true',
-                        help="Include only videos with portrait orientation? Provide flag if 'yes'.")
-    parser.add_argument("-horz", dest="horz_only", action='store_true',
-                        help="Include only videos with horizontal orientation? Provide flag if 'yes'.")
-    parser.add_argument("-min_length", dest="min_length", type=float,
-                        help="Minimum length of video in seconds. Videos shorter than this will be excluded.")
-    parser.add_argument("-max_length", dest="max_length", type=float,
-                        help="Maximum length of video in seconds. Videos longer than this will be excluded.")
-    parser.add_argument("-filename", dest="filename", help="Specify a filename for the playlist file (optional).")
-    parser.add_argument("-zip", dest="zip_output", default='yes', choices=['yes', 'no'],
-                        help="Create a .7z compressed archive of the output directory? 'yes' or 'no' (default 'yes').")
-    
-    args = parser.parse_args()
-    
+def main(arg_dict):  # note: changed 'args' to 'arg_dict'
     # Directory handling and playlist generation
-    generate_output_folder(args)
-    playlist = scan_directory(args)
-    filter_string = generate_filters_flag(args)
+    generate_output_folder(arg_dict)
+    playlist = scan_directory(arg_dict)
+    filter_string = generate_filters_flag(arg_dict)
 
     # Creating playlist file
-    playlist_name = args.filename if args.filename else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
-    output_file = os.path.join(args.output_folder, playlist_name)
-    if os.path.exists(output_file) and not args.overwrite:
+    playlist_name = arg_dict['filename'] if arg_dict['filename'] else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
+    output_file = os.path.join(arg_dict['output_folder'], playlist_name)
+    if os.path.exists(output_file) and not arg_dict['overwrite']:
         print('File already exists, and overwrite is not set. Please change the name or set -overwrite flag.')
         sys.exit(1)
     with open(output_file, 'w') as f:
@@ -182,14 +156,15 @@ def main():
     print(f"Playlist file has been successfully created at: {output_file}")
 
     # .7z Archive creation (if toggled on)
-    if args.zip_output.lower() == 'yes':
+    if arg_dict['zip_output'].lower() == 'yes':
         archive_name = f"{playlist_name.rsplit('.', 1)[0]}.7z"
-        archive_path = os.path.join(args.output_folder, archive_name)
-        create_7z_archive(args.output_folder, archive_path)
+        archive_path = os.path.join(arg_dict['output_folder'], archive_name)
+        create_7z_archive(arg_dict['output_folder'], archive_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
-    # specify other arguments here, akin to previous 'add_argument' invocations
+    # ... specify other arguments here ...
+
     args = parser.parse_args()
     
     # Convert the namespace to a dictionary
