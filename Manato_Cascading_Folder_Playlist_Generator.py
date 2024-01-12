@@ -79,6 +79,7 @@ def main(config_file):
                             config['horz_only'] = config.get('horz_only', False)
                             config['min_length'] = config.get('min_length', None)
                             config['max_length'] = config.get('max_length', None)
+                            config['shuffle_playlist'] = config.get('shuffle_playlist', 'no')  # defaulting to 'no'
 
                             # Convert the config dictionary back to an argparse.Namespace object
                             config_namespace = argparse.Namespace(**config)
