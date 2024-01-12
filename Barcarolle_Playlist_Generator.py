@@ -103,7 +103,7 @@ def scan_directory(args):
                     probe = ffmpeg.probe(full_path)
                     video_info = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
                     width, height = int(video_info['width']), int(video_info['height'])
-                    if (args['portrait'] and width >= height) or (args['horz'] and height > width):
+                    if (args.portrait and width >= height) or (args.horz and height > width):
                         continue
                 mount_path = subdir.replace(args.dir, args.mount)
                 playlist.append(os.path.join(mount_path, file))
@@ -113,14 +113,14 @@ def scan_directory(args):
 
 def generate_output_folder(args):
     if not os.path.exists(args.output):
-        os.makedirs(args['output'])
+        os.makedirs(args.output)
 
 def generate_filters_flag(args):
-    filters = ['shuffle' if args['shuffle'] == 'yes' else '',
-               'portrait' if args['portrait'] else '',
-               'horz' if args['horz'] else '']
+    filters = ['shuffle' if getattr(args, 'shuffle', 'no') == 'yes' else '',
+               'portrait' if getattr(args, 'portrait', False) else '',
+               'horz' if getattr(args, 'horz', False) else '']
     return "-".join(filter(None, filters)) or "nofilter"
-
+    
 def create_7z_archive(output_folder, archive_name):
     compression = {
       "id": py7zr.FILTER_LZMA2,
@@ -139,9 +139,9 @@ def main(args):
     playlist = scan_directory(args)
     filter_string = generate_filters_flag(args)
     
-    playlist_name = args['filename'] if args['filename'] else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
+    playlist_name = args.filename if args.filename else f'playlist_{datetime.now().strftime("%Y%m%d%H%M%S")}.m3u8'
     output_file = os.path.join(args.output, playlist_name)
-    if os.path.exists(output_file) and not args['overwrite']:
+    if os.path.exists(output_file) and not args.overwrite:
         print('File already exists, and overwrite is not set. Please change the name or set -overwrite flag.')
         sys.exit(1)
     with open(output_file, 'w') as f:
@@ -149,10 +149,10 @@ def main(args):
             f.write(f'{vid_path}\n')
     print(f"Playlist file has been successfully created at: {output_file}")
 
-    if args['zip'] == 'yes':
+    if args.zip == 'yes':
         archive_name = f"{playlist_name.rsplit('.', 1)[0]}.7z"
-        archive_path = os.path.join(args['output'], archive_name)
-        create_7z_archive(args['output'], archive_path)
+        archive_path = os.path.join(args.output, archive_name)
+        create_7z_archive(args.output, archive_path)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
