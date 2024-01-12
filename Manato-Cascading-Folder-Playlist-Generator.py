@@ -37,20 +37,20 @@ REQUIRED_PACKAGES = [
     'pyyaml',
     'py7zr'
 ]
+
 try:
     pkg_resources.require(REQUIRED_PACKAGES)
 except pkg_resources.DistributionNotFound as e:
     print("Missing required package: ", e)
     print("Please install by running the command: pip install ", ' '.join(REQUIRED_PACKAGES))
     exit(1)
+
 import yaml
 from Barcarolle-Playlist-Generator import is_valid_file, validate_length, scan_directory, generate_output_folder, \
     generate_filters_flag, main as barcarolle_main, VIDEO_EXTENSIONS
 import py7zr
 
-
 def main(config_file):
-
     # Load parameters from YAML configuration file
     with open(config_file, 'r') as f:
         try:
@@ -85,27 +85,29 @@ def main(config_file):
         except yaml.YAMLError as err:
             print(err)
 
-
 def generate_sample_yaml_file(config_file):
     # Generate a sample YAML configuration file with default values
-    data = {
-        'dirs': ['/path/to/dir1', '/path/to/dir2'],
-        'output_dir': '/output',
-        'os_types': ['linux', 'macos', 'win'],
-        'os_mounts': ['/linux/mount/point', '/macos/mount/point', '/win/mount/point'],
-        'filters': {
-            'min_length': 30,
-            'max_length': 300,
-            'auto_gen_playlist': 'yes',
-            'shuffle_playlist': 'yes',
-            'portrait_only': False,
-            'horz_only': False,
-            'zip_output': 'yes'
+    try:
+        data = {
+            'dirs': ['/path/to/dir1', '/path/to/dir2'],
+            'output_dir': '/output',
+            'os_types': ['linux', 'macos', 'win'],
+            'os_mounts': ['/linux/mount/point', '/macos/mount/point', '/win/mount/point'],
+            'filters': {
+                'min_length': 30,
+                'max_length': 300,
+                'auto_gen_playlist': 'yes',
+                'shuffle_playlist': 'yes',
+                'portrait_only': False,
+                'horz_only': False,
+                'zip_output': 'yes'
+            }
         }
-    }
 
-    with open(config_file, 'w') as outfile:
-        yaml.dump(data, outfile, default_flow_style=False)
+        with open(config_file, 'w') as outfile:
+            yaml.dump(data, outfile, default_flow_style=False)
+    except Exception as e:
+        print(f"An error occurred during sample configuration file generation: {e}")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Manato-Playlist-Generator. Provide a YAML config file or generate a sample one.")
