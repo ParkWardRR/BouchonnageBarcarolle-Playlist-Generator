@@ -188,7 +188,15 @@ def main():
         create_7z_archive(args.output_folder, archive_path)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Process media files and create a playlist file with optional .7z archiving.")
+    # specify other arguments here, akin to previous 'add_argument' invocations
+    args = parser.parse_args()
+    
+    # Convert the namespace to a dictionary
+    arg_dict = vars(args)
+
+    # Call the 'main' function with the dictionary as argument
+    main(arg_dict)
 
 
 """
