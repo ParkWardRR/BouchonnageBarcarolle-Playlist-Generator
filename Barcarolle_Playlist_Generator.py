@@ -89,7 +89,9 @@ def validate_length(args, full_path):
     except ffmpeg._run.Error as e:
         print(str(e))
         return False
-    return not ((args.min_length and duration < args.min_length) or (args.max_length and duration > args.max_length))
+    min_length = getattr(args, 'min_length', None)
+    max_length = getattr(args, 'max_length', None)
+    return not ((min_length and duration < min_length) or (max_length and duration > max_length))
 
 def scan_directory(args):
     """Scan the specified directory, applying any filters, and compile the playlist."""
