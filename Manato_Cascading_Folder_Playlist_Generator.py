@@ -66,8 +66,8 @@ def main(config_file):
                     if subdir.is_dir():
                         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                         config['dir'] = subdir.path
-                        config['output_folder'] = Path(config['output_dir'], subdir.name + '-' + timestamp)     # Appending time stamp to output folder
-
+                        output_folder = Path(config['output_dir'], subdir.name + '-' + timestamp)     # Appending time stamp to output folder
+                        config['output'] = output_folder
                         # Checks and creates output directories if they don't exist
                         os.makedirs(config['output_folder'], exist_ok=True)
 
