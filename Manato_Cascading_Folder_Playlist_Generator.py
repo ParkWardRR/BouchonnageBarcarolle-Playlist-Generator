@@ -79,7 +79,7 @@ def main(config_file):
                             config['horz_only'] = config.get('horz_only', False)
                             config['min_length'] = config.get('min_length', None)
                             config['max_length'] = config.get('max_length', None)
-                            config['shuffle_playlist'] = config.get('shuffle_playlist', 'no')  # defaulting to 'no'
+                            config['shuffle_playlist'] = config.get('shuffle_playlist', 'no')  # defaulting to 'no' if missing
 
                             # Convert the config dictionary back to an argparse.Namespace object
                             config_namespace = argparse.Namespace(**config)
@@ -107,15 +107,15 @@ def generate_sample_yaml_file(config_file):
             'output_dir': '/output',
             'os_types': ['linux', 'macos', 'win'],
             'os_mounts': ['/linux/mount/point', '/macos/mount/point', '/win/mount/point'],
-            'filters': {
-                'min_length': 30,
-                'max_length': 300,
-                'auto_gen_playlist': 'yes',
-                'shuffle_playlist': 'yes',
-                'portrait_only': False,
-                'horz_only': False,
-                'zip_output': 'yes'
+            'min_length': 30,
+            'max_length': 300,
+            'auto_gen_playlist': 'yes',
+            'shuffle_playlist': 'yes',
+            'portrait_only': False,
+            'horz_only': False,
+            'zip_output': 'yes'
             }
+        
         }
 
         with open(config_file, 'w') as outfile:
