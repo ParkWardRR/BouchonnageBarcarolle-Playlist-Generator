@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Manato-Cascading-Folder-Playlist-Generator.py
+# Manato_Cascading_Folder_Playlist_Generator.py
 
 """
 ============
@@ -9,13 +9,13 @@ Description
 2. .m3u8 playlist files are generated for each subdirectory with names matching the parent directory.
 3. Also supports creating mounting points for playlist paths for Linux, MacOS, and Windows.
 4. Generates 7z archives of the output directory.
-5. Utilizes Barcarolle-Playlist-Generator functionality.
+5. Utilizes Barcarolle_Playlist_Generator functionality.
 
 ===============
 How to execute
 ===============
-1. python Manato-Cascading-Folder-Playlist-Generator.py -config /path/to/config.yaml
-2. (To generate a sample config file:) python Manato-Cascading-Folder-Playlist-Generator.py -generate_sample_config /path/to/sample_config.yaml
+1. python Manato_Cascading_Folder_Playlist_Generator.py -config /path/to/config.yaml
+2. (To generate a sample config file:) python Manato_Cascading_Folder_Playlist_Generator.py -generate_sample_config /path/to/sample_config.yaml
 
 ======
 Params
@@ -46,7 +46,7 @@ except pkg_resources.DistributionNotFound as e:
     exit(1)
 
 import yaml
-from Barcarolle-Playlist-Generator import is_valid_file, validate_length, scan_directory, generate_output_folder, \
+from Barcarolle_Playlist_Generator import is_valid_file, validate_length, scan_directory, generate_output_folder, \
     generate_filters_flag, main as barcarolle_main, VIDEO_EXTENSIONS
 import py7zr
 
@@ -119,14 +119,14 @@ def is_valid_file(parser, x):
 
 if __name__ == '__main__':
     print("Running script...")
-    parser = argparse.ArgumentParser(description="Manato-Playlist-Generator. Provide a YAML config file or generate a sample one.")
+    parser = argparse.ArgumentParser(description="Manato_Playlist_Generator. Provide a YAML config file or generate a sample one.")
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-config', dest="config_file", type=lambda x: is_valid_file(parser, x), help="Path to the YAML configuration file (required).")
-    group.add_argument('-generate_sample_config', dest="sample_config_file", nargs='?', const='Manato-Cascading-Folder-Playlist-Generator.config.yaml', help="Generate a sample YAML configuration file.")
+    group.add_argument('-generate_sample_config', dest="sample_config_file", nargs='?', const='Manato_Cascading_Folder_Playlist_Generator.config.yaml', help="Generate a sample YAML configuration file.")
     args = parser.parse_args()
 
     if args.config_file:
         print("Running main function...")
         main(args.config_file)
     else:
-        generate_sample_yaml_file(args.sample_config_file if args.sample_config_file else 'Manato-Cascading-Folder-Playlist-Generator.config.yaml')
+        generate_sample_yaml_file(args.sample_config_file if args.sample_config_file else 'Manato_Cascading_Folder_Playlist_Generator.config.yaml')
