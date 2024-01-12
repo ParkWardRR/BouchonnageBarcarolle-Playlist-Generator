@@ -151,7 +151,7 @@ def main(args):
     arg_dict = vars(args)
 
     # Directory handling and playlist generation
-    def generate_output_folder(arg_dict):
+def generate_output_folder(arg_dict):
     """Generate the specified output folder if it does not exist."""
     if not os.path.exists(arg_dict['output_folder']):
         os.makedirs(arg_dict['output_folder'])
