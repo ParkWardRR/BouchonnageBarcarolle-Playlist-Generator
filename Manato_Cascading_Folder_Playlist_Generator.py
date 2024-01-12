@@ -69,7 +69,7 @@ def main(config_file):
                         output_folder = Path(config['output_dir'], subdir.name + '-' + timestamp)     # Appending time stamp to output folder
                         config['output'] = output_folder
                         # Checks and creates output directories if they don't exist
-                        os.makedirs(config['output_folder'], exist_ok=True)
+                        os.makedirs(output_folder, exist_ok=True)
 
                         for os_type, os_mount in zip(config['os_types'], config['os_mounts']):
                             config['mount'] = os_mount
