@@ -81,10 +81,10 @@ def main(config_file):
                             config['max_length'] = config.get('max_length', None)
                             config['shuffle_playlist'] = config.get('shuffle_playlist', 'no')  # defaulting to 'no' if missing
 
-                            # Convert the config dictionary back to an argparse.Namespace object
-                            config_namespace = argparse.Namespace(**config)
+                           config_namespace = argparse.Namespace(**config)
 
-                            barcarolle_main(config_namespace)
+                        
+                            barcarolle_main(config_namespace)  # instead of barcarolle_main(config)
 
                             archive_name = f"{subdir.name}-{os_type}-{timestamp}.7z"
                             archive_path = os.path.join(config['output_folder'], archive_name)
