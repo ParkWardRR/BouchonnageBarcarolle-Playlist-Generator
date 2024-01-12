@@ -107,15 +107,14 @@ def generate_sample_yaml_file(config_file):
     with open(config_file, 'w') as outfile:
         yaml.dump(data, outfile, default_flow_style=False)
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Manato-Playlist-Generator. Provide a YAML config file or generate a sample one.")
-    group = parser.add_mutually_exclusive_group(required=True)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument('-config', dest="config_file", type=lambda x: is_valid_file(parser, x), help="Path to the YAML configuration file (required).")
-    group.add_argument('-generate_sample_config', dest="sample_config_file", default='Manato-Cascading-Folder-Playlist-Generator.config.yaml', help="Generate a sample YAML configuration file.")
+    group.add_argument('-generate_sample_config', dest="sample_config_file", nargs='?', const='Manato-Cascading-Folder-Playlist-Generator.config.yaml', help="Generate a sample YAML configuration file.")
     args = parser.parse_args()
 
     if args.config_file:
         main(args.config_file)
-    elif args.sample_config_file:
-        generate_sample_yaml_file(args.sample_config_file)
+    else:
+        generate_sample_yaml_file(args.sample_config_file if args.sample_config_file else 'Manato-Cascading-Folder-Playlist-Generator.config.yaml')
