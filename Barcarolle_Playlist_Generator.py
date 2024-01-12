@@ -92,7 +92,7 @@ def validate_length(args, full_path):
 
 def scan_directory(args):
     playlist = []
-    for subdir, dirs, files in os.walk(args['dir']):
+    for subdir, dirs, files in os.walk(args.dir):
         for file in files:
             ext = file.split('.')[-1]
             if ext.lower() in VIDEO_EXTENSIONS:
