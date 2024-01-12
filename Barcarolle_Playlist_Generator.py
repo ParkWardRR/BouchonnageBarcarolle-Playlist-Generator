@@ -117,7 +117,7 @@ def scan_directory(args):
             else:
                 print(f"File: {os.path.join(subdir, file)} is not a recognizable video format. Skipping...")      
     return playlist
-
+    
 def generate_output_folder(arg_dict):
     """Generate the specified output folder if it does not exist."""
     if not os.path.exists(arg_dict['output_folder']):
