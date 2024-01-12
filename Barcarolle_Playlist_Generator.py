@@ -123,9 +123,9 @@ def generate_output_folder(args):
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
 
-def generate_filters_flag(args):
+def generate_filters_flag(arg_dict):
     """Construct a string flag representing the filters applied to the playlist."""
-    filters = ['shuffle' if args.shuffle_playlist == 'yes' else '',
+    filters = ['shuffle' if arg_dict['shuffle_playlist'] else '',
                'portrait' if args.portrait_only else '',
                'horizontal' if args.horz_only else '']
     return "-".join(filter(None, filters)) or "nofilter"
